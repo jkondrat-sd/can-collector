@@ -1,11 +1,36 @@
 # Freematics OBD
-<p>Esse é um código voltado para a coleta e o envio de telemetria para a plataforma do <a href="google.com">thingsboard</a> no servidor do Inmetro.</p>
+<p>Esse é um código voltado para a coleta e o envio de telemetria do Freematics OBD, para a plataforma do <a href="https://mobilidade.inmetro.gov.br/login">thingsboard</a> no servidor do Inmetro.</p>
 
-<a href="./docs/DOCS.md">docs</a> documentação mais detalhada sobre algumas funcionalidades.
+<a href="./docs/DOCS.md">Documentação detalhada sobre as funcionalidades do código.</a>
 
 #### Guia simples:
+Para compilar o código e embarcar no Freematics OBD, é necessário instalar o <a href="https://docs.platformio.org/en/latest/what-is-platformio.html">Platformio</a>, e algumas dependências extras.
+**_python requiriments_**
+Guia de instalação do Platformio e outras dependências em um ambiente virtual em python
+```sh
+python3 -m venv .venv
+
+#linux
+source .venv/bin/active
+#windows
+.\.venv\Scripts\Activate.ps1
+
+python3 -m pip install -U esptool platformio
+```
+**_Compilando o código_**
+Guia de comandos do Platformio para compilar, limpar, monitorar e instalar novas bibliotecas se necessário. Todos esses comandos devem ser execudados no mesmo diretório em que se encontra o "platformio.ini".
+```sh
+pio run # compila o código
+pio run -t upload # embarca o código
+pio run -t clean # limpa dados compilados. Util em caso de erro persistente em código já compilado
+pio device monitor -b 115200 # ler dados do dispositivo via serial. O parâmetro -b indica qual a frequência serial do dispositivo, caso o dispositivo utilize outra, mude esse valor para a mesma. Exemplo: pio device monitor -b 9600
+pio pkg install ExampleLib@0.0.1 # baixa uma biblioteca com versão específica. Exemplo: pio pkg install Thingsboard@0.15.0
+pio pkg uninstall ExampleLib@0.0.1 # remove uma biblioteca em específico. Exmplo: pio pkg uninstall Thingsboard@0.15.0
+pio pkg list # lista bibliotecas baixadas localmente
+```
+
 **_platformio.ini_**
-Arquivo de configuração do OBD, contendo todas as informações para o compilador.
+Arquivo de configuração do OBD, contendo todas as configurações do dispositivo, depêndencias de bibiliotecas, e informações para o compilador.
 ```ini
 ; guia: https://docs.platformio.org/en/latest/projectconf/index.html
 [env:esp32dev]
@@ -21,20 +46,6 @@ monitor_filters = default, log2file, colorize ; Gera logs a partir do monitor e 
 lib_deps = thingsboard/ThingsBoard@0.15.0 ; Bibliotecas utilizadas no código
 ```
 
-**_python requiriments_**
-Guia de instalação do Platformio e outras dependências em um ambiente virtual em python
-```sh
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install -r requeriments.txt
-# ou 
-python3 -m pip install ajsonrpc anyio bitarray bitstring bottle certifi cffi charset-normalizer click colorama cryptography esptool h11 idna intelhex markdown-it-py marshmallow mdurl packaging pip platformio pycparser pyelftools Pygments pyserial PyYAML reedsolo requests rich rich-click semantic-version sniffio starlette tabulate typing_extensions urllib3 uvicorn
-
-#linux
-sorce .venv/bin/active
-#windows
-.\.venv\Scripts\Activate.ps1
-```
 
 **_Configurações iniciais_:**
 Configuração de credenciais para WiFi, e acessar o Thingsboard
@@ -62,30 +73,18 @@ constexpr char ROOT_CERT[] = R"(-----BEGIN CERTIFICATE-----
 )";
 ```
 
-**_Compilando o código_**
-Guia de comandos do Platformio para compilar, limpar, monitorar e instalar novas bibliotecas se necessário. 
-```sh
-pio run # compila o código
-pio run -t upload # embarca o código
-pio run -t clean # limpa dados compilados. Util em caso de erro persistente em código já compilado
-pio device monitor # ler dados do dispositivo via serial
-pio pkg install ExampleLib@0.0.1 # baixa uma biblioteca com versão específica
-pio pkg uninstall ExampleLib@0.0.1 # remove uma biblioteca em específico
-pio pkg list # lista bibliotecas baixadas localmente
-```
-
 **_Biblitecas_**
-Bibliotecas utilizadas no código e suas respectivas versões
+Bibliotecas utilizadas no código e suas respectivas versões.
 ```c
 #include <Arduino.h> // Framework Arduino
 
-/* Bibliotecas do Freematics; firmware V5 */
+/* Bibliotecas do Freematics OBD; firmware V5 */
 #include <FreematicsPlus.h>    // Biblioteca para o Freematics ONE modelo Plus
-#include <FreematicsBase.h> // Classes para determinar alguns modelos de dados prontos, como o GPS
-#include "esp_wifi.h" // corrige erro de dependencias do Freematics em questão de algumas bibliotecas. Essa é uma biblioteca nativa do esp32
+#include <FreematicsBase.h> // Classes para determinar alguns modelos de dados prontos, como o GPS.
+#include "esp_wifi.h" // corrige erro de dependencias do Freematics em questão de algumas bibliotecas. Essa é uma biblioteca nativa do esp32.
 
 /* Thingsboard@0.15.0 */
-// Bibliotecas para o uso do Thingsboard
+// Bibliotecas para o uso de protocolos direfentes.
 /* Caso utilize comunicação HTTP */
 #include <Arduino_HTTP_Client.h>
 #include <ThingsBoardHttp.h>
