@@ -34,7 +34,7 @@ PIDTELEMETRY pidTelemetry[] = {
   { (byte)PID_ABSOLUTE_ENGINE_LOAD, "absolute_engine_load"},
   { (byte)PID_FUEL_INJECTION_TIMING, "fuel_injection_timing"},
   { (byte)PID_DEVICE_HALL, "device_hall"}
-}
+};
 
 void ObdReconnect()
 {
@@ -70,10 +70,9 @@ void loop()
 
     for(int i = 0; i < sizeof(pidTelemetry)/sizeof(pidTelemetry[0]);i++){
         int value;
-        obd.readPID(pidTelemtry[i].pid, value);
+        obd.readPID(pidTelemetry[i].pid, value);
         String telemetry = pidTelemetry[i].telemetry;
-        Serial.println(telemetry);
-        Serial.println(value);
+        Serial.printf("PID: %s VALUE: %d",telemetry, value);
         Serial.println("\n");
     }
 }

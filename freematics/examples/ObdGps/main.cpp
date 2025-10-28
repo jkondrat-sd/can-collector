@@ -25,20 +25,20 @@ void loop()
     delay(1000);
     if(sys.gpsGetData(&gd) && gd != nullptr){
         if(gd->sat >= 4) {
-            Serial.println("latitude: "); Serial.println(gd -> lat, 6);
-            Serial.println("longitude: "); Serial.println(gd -> lng, 6);
-            Serial.println("altitude: "); Serial.println(gd -> alt, 2);
-            Serial.println("velocidade: "); Serial.println(gd -> speed * 1.852, 2);
-            Serial.println(""); Serial.println(gd -> heading);
-            Serial.println(""); Serial.println(gd -> sat);
-            Serial.println(""); Serial.println(gd -> hdop);
-            Serial.println(""); Serial.println(gd -> date);
-            Serial.println(""); Serial.println(gd -> time);
-            Serial.println(""); Serial.prinln(gd -> ts);
+            Serial.printf("latitude: "); Serial.println(gd -> lat, 6);
+            Serial.printf("longitude: "); Serial.println(gd -> lng, 6);
+            Serial.printf("altitude: "); Serial.println(gd -> alt, 2);
+            Serial.printf("velocidade: "); Serial.println(gd -> speed * 1.852, 2);
+            Serial.printf(""); Serial.println(gd -> heading);
+            Serial.printf(""); Serial.println(gd -> sat);
+            Serial.printf(""); Serial.println(gd -> hdop);
+            Serial.printf(""); Serial.println(gd -> date);
+            Serial.printf(""); Serial.println(gd -> time);
+            Serial.printf(""); Serial.println(gd -> ts);
         } else {
-            Serial.println("Erro!\nNão foi possível conectar ao satélite!")
+            Serial.println("Erro! Não foi possível conectar ao satélite!");
         }
     } else {
-        Serial.println("Erro ao ")
+        Serial.println("Erro ao ler o GPS!");
     }
 }

@@ -70,17 +70,17 @@ void loop()
 
     if(state.check(STATE_MEMS_READY)){
         if(mems->read(acc,gyr,mag)){
-            Serial.println("acc x: "); Serial.println(acc[0]);
-            Serial.println(" acc y: "); Serial.println(acc[1]);
-            Serial.println(" acc z: "); Serial.println(acc[2]);
-            Serial.println("\n");
-            Serial.println("gyr: "); Serial.println(gyr[0]);
-            Serial.println(" gyr: "); Serial.println(gyr[1]);
-            Serial.println(" gyr: "); Serial.println(gyr[2]);
-            Serial.println("\n");
-            Serial.println("mag x: \r"); Serial.println(mag[0]);
-            Serial.println(" mag y: "); Serial.println(mag[1]);
-            Serial.println(" mag z: "); Serial.println(mag[2]);
+            Serial.printf("acc x: "); Serial.println(acc[0]);
+            Serial.printf(" acc y: "); Serial.println(acc[1]);
+            Serial.printf(" acc z: "); Serial.println(acc[2]);
+
+            Serial.printf("gyr: "); Serial.println(gyr[0]);
+            Serial.printf(" gyr: "); Serial.println(gyr[1]);
+            Serial.printf(" gyr: "); Serial.println(gyr[2]);
+
+            Serial.printf("mag x: \r"); Serial.println(mag[0]);
+            Serial.printf(" mag y: "); Serial.println(mag[1]);
+            Serial.printf(" mag z: "); Serial.println(mag[2]);
         }
     }
 }
