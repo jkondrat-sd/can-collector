@@ -5,7 +5,9 @@
 
 #### Guia simples:
 Para compilar o código e embarcar no Freematics OBD, é necessário instalar o <a href="https://docs.platformio.org/en/latest/what-is-platformio.html">Platformio</a>, e algumas dependências extras.
-**_python requiriments_**
+
+#### **python requiriments**
+-------------------------
 Guia de instalação do Platformio e outras dependências em um ambiente virtual em python
 ```sh
 python3 -m venv .venv
@@ -17,7 +19,8 @@ source .venv/bin/active
 
 python3 -m pip install -U esptool platformio
 ```
-**_Compilando o código_**
+#### **Compilando o código**
+---------------------
 Guia de comandos do Platformio para compilar, limpar, monitorar e instalar novas bibliotecas se necessário. Todos esses comandos devem ser execudados no mesmo diretório em que se encontra o "platformio.ini".
 ```sh
 pio run # compila o código
@@ -29,7 +32,8 @@ pio pkg uninstall ExampleLib@0.0.1 # remove uma biblioteca em específico. Exmpl
 pio pkg list # lista bibliotecas baixadas localmente
 ```
 
-**_platformio.ini_**
+#### **platformio.ini**
+--------------------
 Arquivo de configuração do OBD, contendo todas as configurações do dispositivo, depêndencias de bibiliotecas, e informações para o compilador.
 ```ini
 ; guia: https://docs.platformio.org/en/latest/projectconf/index.html
@@ -47,7 +51,8 @@ lib_deps = thingsboard/ThingsBoard@0.15.0 ; Bibliotecas utilizadas no código
 ```
 
 
-**_Configurações iniciais_:**
+#### **Configurações iniciais**
+-----------------------------
 Configuração de credenciais para WiFi, e acessar o Thingsboard
 ```c
 // WiFi credentials
@@ -73,7 +78,8 @@ constexpr char ROOT_CERT[] = R"(-----BEGIN CERTIFICATE-----
 )";
 ```
 
-**_Biblitecas_**
+#### **Bibliotecas**
+----------------
 Bibliotecas utilizadas no código e suas respectivas versões.
 ```c
 #include <Arduino.h> // Framework Arduino
