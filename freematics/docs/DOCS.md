@@ -114,7 +114,6 @@ void InitWiFi() {
 ```
 
 ### **OBD config**
-====================
 Essas são configurações e orientações para utilizar o Freematics OBD e seus determindados módulos para a leitura de dados.
 
 Configurações para iniciar a leitura de CAN no Freematics OBD.
@@ -310,6 +309,7 @@ void loop()
   }
 }
 ```
+--------------------------
 
 ### **Thingsboard config**
-==========================
+
