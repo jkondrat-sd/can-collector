@@ -1,5 +1,10 @@
 # Freematics OBD
+
+# Resumo sobre o projeto33336666666666666666666666666666666666666666666666,3
+
 <p>Esse é um código voltado para a coleta e o envio de telemetria do Freematics OBD, para a plataforma do <a href="https://mobilidade.inmetro.gov.br/login">thingsboard</a> no servidor do Inmetro.</p>
+
+<img href="./docs/img/diagrama.png">
 
 <a href="./docs/DOCS.md">Documentação detalhada sobre as funcionalidades do código.</a>
 
