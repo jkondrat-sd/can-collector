@@ -50,10 +50,11 @@ constexpr char WIFI_PASSWORD[] = "123123123";
 
 // See https://thingsboard.io/docs/getting-started-guides/helloworld/
 // to understand how to obtain an access token
-constexpr char TOKEN[] = "";
+constexpr char TOKEN[] = "tokentokentoken";
 
 // Thingsboard we want to establish a connection too
-constexpr char THINGSBOARD_SERVER[] = "site.com";
+// constexpr char THINGSBOARD_SERVER[] = "site.com";
+constexpr char THINGSBOARD_SERVER[] = "www.site.com";
 
 #if USING_HTTPS
 // HTTP port used to communicate with the server, 80 is the default unencrypted HTTP port,
@@ -126,38 +127,6 @@ const std::array<IAPI_Implementation*, 0U> apis = {};
 ThingsBoard tb(mqttClient, MAX_MESSAGE_RECEIVE_SIZE, MAX_MESSAGE_SEND_SIZE, Default_Max_Stack_Size, apis);
 #endif
 
-
-/// @brief Initalizes WiFi connection,
-// will endlessly delay until a connection has been successfully established
-void InitWiFi() {
-  Serial.println("Connecting to AP ...");
-  // Attempting to establish a connection to the given WiFi network
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  while (WiFi.status() != WL_CONNECTED) {
-    // Delay 500ms until a connection has been successfully established
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("Connected to AP");
-#if ENCRYPTED
-  espClient.setCACert(ROOT_CERT);
-#endif
-}
-
-/// @brief Reconnects the WiFi uses InitWiFi if the connection has been removed
-/// @return Returns true as soon as a connection has been established again
-bool reconnect() {
-  // Check to ensure we aren't connected yet
-  const wl_status_t status = WiFi.status();
-  if (status == WL_CONNECTED) {
-    return true;
-  }
-
-  // If we aren't establish a new connection to the given WiFi network
-  InitWiFi();
-  return true;
-}
-
 // Freematics OBD config
 FreematicsESP32 sys; // Instances the system Freematics
 COBD obd; // communication CAN
@@ -214,11 +183,21 @@ STATE state;
 /// @param duration receives a value of type int that determines the time this asset goes
 void beep(int duration)
 {
-    // turn on buzzer at 2000Hz frequency 
-    sys.buzzer(2000);
+    // turn on buzzer at 2000Hz frequency
+    // 1, 193, 180 
+    //sys.buzzer(2000);
+    sys.buzzer(1800);
     delay(duration);
     // turn off buzzer
     sys.buzzer(0);
+}
+
+void beepCode(int i)
+{
+  for(int g; g <= i; g++){
+    beep(300);
+    delay(50);
+  }
 }
 
 /* Data model for GPS */
@@ -275,6 +254,39 @@ void ObdReconnect(){
   obd.begin(sys.link);
 }
 
+/// @brief Initalizes WiFi connection,
+// will endlessly delay until a connection has been successfully established
+void InitWiFi() {
+  Serial.println("Connecting to AP ...");
+  // Attempting to establish a connection to the given WiFi network
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    // Delay 500ms until a connection has been successfully established
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("Connected to AP");
+#if ENCRYPTED
+  espClient.setCACert(ROOT_CERT);
+#endif
+}
+
+/// @brief Reconnects the WiFi uses InitWiFi if the connection has been removed
+/// @return Returns true as soon as a connection has been established again
+bool reconnect() {
+  // Check to ensure we aren't connected yet
+  const wl_status_t status = WiFi.status();
+  if (status == WL_CONNECTED) {
+    return true;
+  }
+  beep(3000);
+  delay(100);
+  beep(3000);
+  // If we aren't establish a new connection to the given WiFi network
+  InitWiFi();
+  return true;
+}
+
 void setup() {
   // If analog input pin 0 is unconnected, random analog
   // noise will cause the call to randomSeed() to generate
@@ -308,17 +320,25 @@ void setup() {
   obd.begin(sys.link);
   delay(1000);
   InitWiFi();
+
+  beep(300);
+  beep(150);
 }
 
 void loop() {
   delay(1000);
+  beep(500);
+
   MAIN_GPS gps;
   GYROSCOPE gyroscope;
   // if case erro, reconnect comunication with obd
-  ObdReconnect();
+  // ObdReconnect();
 
   // Checking CAN communication
   if(!connected){
+    beep(300);
+    delay(150);
+    beep(300);
     if(obd.init()){
       connected = true;
     }
@@ -444,7 +464,7 @@ void loop() {
       tb.sendTelemetryData("gps_date",gps.date);
       tb.sendTelemetryData("gps_time",gps.time);
       tb.sendTelemetryData("timestamp",gps.ts);    
-
+    }
       if(gpsStatus == 1){
         tb.sendTelemetryData("gps_msg", "No GPS data available"); // Mensagem caso satélite esteja fora do ar ou não consiga se comunicar
       }else if(gpsStatus == 2){
@@ -452,9 +472,9 @@ void loop() {
       } else {
         tb.sendTelemetryData("gps_msg","gps ok");
       }
-    } else {
-      tb.sendTelemetryData("gps_msg","");
-    }
+    //} else {
+    //  tb.sendTelemetryData("gps_msg","module gps no active");
+    //}
 
     
     // ICM_42627 telemetry data
@@ -480,4 +500,15 @@ void loop() {
 #if !USING_HTTPS
   tb.loop();
 #endif
+delay(150);
+beep(300);
+delay(150);
+beep(300);
+delay(150);
+beep(300);
+delay(150);
+beep(300);
+delay(150);
+beep(150);
+delay(150);
 }
