@@ -1,6 +1,6 @@
 # Freematics OBD
 
-# Resumo sobre o projeto33336666666666666666666666666666666666666666666666,3
+#### Resumo sobre o projeto
 
 <p>Esse é um código voltado para a coleta e o envio de telemetria do Freematics OBD, para a plataforma do <a href="https://mobilidade.inmetro.gov.br/login">thingsboard</a> no servidor do Inmetro.</p>
 
@@ -13,7 +13,9 @@ Para compilar o código e embarcar no Freematics OBD, é necessário instalar o 
 
 #### **python requiriments**
 -------------------------
+
 Guia de instalação do Platformio e outras dependências em um ambiente virtual em python
+
 ```sh
 python3 -m venv .venv
 
@@ -26,7 +28,9 @@ python3 -m pip install -U esptool platformio
 ```
 #### **Compilando o código**
 ---------------------
+
 Guia de comandos do Platformio para compilar, limpar, monitorar e instalar novas bibliotecas se necessário. Todos esses comandos devem ser execudados no mesmo diretório em que se encontra o "platformio.ini".
+
 ```sh
 pio run # compila o código
 pio run -t upload # embarca o código
@@ -39,26 +43,14 @@ pio pkg list # lista bibliotecas baixadas localmente
 
 #### **platformio.ini**
 --------------------
-Arquivo de configuração do OBD, contendo todas as configurações do dispositivo, depêndencias de bibiliotecas, e informações para o compilador.
-```ini
-; guia: https://docs.platformio.org/en/latest/projectconf/index.html
-[env:esp32dev]
-platform = espressif32 ; Utiliza bibliotecas e função do ESP32
-board = esp-wrover-kit ; Modelo da placa utilizada 
-board_build.f_cpu = 160000000L ;
-framework = arduino ; Código com base na plataforma Arduino
-monitor_speed = 115200 ; Define leitura padrão do monitor
-board_build.flash_mode = qio ;
-board_build.partitions = huge_app.csv ;
-monitor_filters = default, log2file, colorize ; Gera logs a partir do monitor e armazena
-; lib_extra_dirs = ../libraries ; Bibliotecas extras instaladas localmente
-lib_deps = thingsboard/ThingsBoard@0.15.0 ; Bibliotecas utilizadas no código
-```
 
+Arquivo de configuração do OBD, contendo todas as configurações do dispositivo, depêndencias de bibiliotecas, e informações para o compilador.
 
 #### **Configurações iniciais**
 -----------------------------
+
 Configuração de credenciais para WiFi, e acessar o Thingsboard
+
 ```c
 // WiFi credentials
 constexpr char WIFI_SSID[] = "WebTeste";
@@ -85,7 +77,10 @@ constexpr char ROOT_CERT[] = R"(-----BEGIN CERTIFICATE-----
 
 #### **Bibliotecas**
 ----------------
+
 Bibliotecas utilizadas no código e suas respectivas versões.
+Informações das bibliotecas utilizadas no código.
+<!--
 ```c
 #include <Arduino.h> // Framework Arduino
 
@@ -103,3 +98,4 @@ Bibliotecas utilizadas no código e suas respectivas versões.
 #include <Arduino_MQTT_Client.h>
 #include <ThingsBoard.h>
 ```
+-->
