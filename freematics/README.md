@@ -38,7 +38,7 @@ Esse projeto tem por objetivo a coleta, e o envio de dados veiculares para a pla
 - Nível de Segurança:
     >  O prejeto conta com o uso de SSL/TLS para garantir uma comunicação segura entre o dispositivo e a plataforma. O dispositivo utliza um CA x509 para garantir a segurança durante a comunicação.
 
-<img src="/assets/images/Arquitetura.jpg">
+<img src="./assets/images/Arquitetura.jpg">
 
 <!-- <a href="./docs/DOCS.md">Documentação detalhada sobre as funcionalidades do código.</a> -->
 ----------------
