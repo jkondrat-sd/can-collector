@@ -38,8 +38,7 @@ Esse projeto tem por objetivo a coleta, e o envio de dados veiculares para a pla
 - Nível de Segurança:
     >  O prejeto conta com o uso de SSL/TLS para garantir uma comunicação segura entre o dispositivo e a plataforma. O dispositivo utliza um CA x509 para garantir a segurança durante a comunicação.
 
-<img href="./img/Arquitetura.png">
-![Screenshot of a comment on a GitHub issue showing an image, added in the Markdown, of an Octocat smiling and raising a tentacle.](/assets/images/Arquitetura.jpg)
+<img src="/assets/images/Arquitetura.jpg">
 
 <!-- <a href="./docs/DOCS.md">Documentação detalhada sobre as funcionalidades do código.</a> -->
 ----------------
@@ -157,92 +156,29 @@ Informações das bibliotecas utilizadas no código.
 #### **Informações técnicas do Freematics OBD modelo H**
 
 <h5>Detalhes e informações sobre o <a href="https://freematics.com/pages/products/freematics-one-plus-model-h/">modelo H</a></h5>
-<table border="1" cellpadding="5" width="100%">
-	<tbody>
-		<tr>
-			<th>&nbsp;</th>
-			<th>SIM7600E-H</th>
-			<th>SIM7600A-H</th>
-		</tr>
-		<tr>
-			<td>Mobile Network Bands</td>
-			<td>LTE-TDD B38/B40/B41<br>
-			LTE-FDDB1/B3/B5/B7/B8/B20<br>
-			UMTS/HSPA+ B1/B5/B8<br>
-			GSM/GPRS/EDGEB3/B8</td>
-			<td>
-			<p>LTE-FDD B2/B4/B12<br>
-			UMTS/HSPA+ B2/B5</p>
-			</td>
-		</tr>
-		<tr>
-			<td>Data Transfer Speed</td>
-			<td colspan="2">LTE CAT4: Uplink up to 50Mbps, Downlink up to 150Mbps<br>
-			HSPA+: Uplink up to 5.76Mbps, Downlink up to 42 Mbps<br>
-			UMTS: Uplink/Downlink up to 384Kbps<br>
-			EDGE: Uplink/Downlink up to 236.8Kbps<br>
-			GPRS: Uplink/Downlink up to 85.6Kbps</td>
-		</tr>
-		<tr>
-			<td>Regions</td>
-			<td>Europe, Asia, Australia</td>
-			<td>North America (AT&amp;T Certified)</td>
-		</tr>
-	</tbody>
-</table>
+
+|	                   |SIM7600E-H                                                                                     | SIM7600A-H                                    |
+| :---                 | :---                                                                                          | :---                                          |
+| Mobile Network Bands | LTE-TDD B38/B40/B41<br>LTE-FDDB1/B3/B5/B7/B8/B20<br>UMTS/HSPA+ B1/B5/B8<br>GSM/GPRS/EDGEB3/B8 | <p>LTE-FDD B2/B4/B12<br> UMTS/HSPA+ B2/B5</p> |
+| Regions              | Europe, Asia, Australia                                                                       | North America (AT&amp;T Certified)            |
+
+| SIM7600E-H | SIM7600A-H |
+| :--- | :---|
+| Data Transfer Speed | LTE CAT4: Uplink up to 50Mbps, Downlink up to 150Mbps<br> HSPA+: Uplink up to 5.76Mbps, Downlink up to 42 Mbps<br> UMTS: Uplink/Downlink up to 384Kbps<br>EDGE: Uplink/Downlink up to 236.8Kbps<br>GPRS: Uplink/Downlink up to 85.6Kbps|
+
 
 <h5>Comparação entre o modelo H e A</h5>
 
-<table border="1" cellpadding="5" width="100%">
-	<tbody>
-		<tr>
-			<th>&nbsp;</th>
-			<th width="37%">Model H</th>
-			<th width="37%"><a href="https://freematics.com/store/index.php?route=product/product&amp;product_id=85">Model A</a></th>
-		</tr>
-		<tr>
-			<td>RAM Configuration</td>
-			<td>520KB IRAM + 8MB PSRAM</td>
-			<td>520KB IRAM</td>
-		</tr>
-		<tr>
-			<td>Flash Memory</td>
-			<td>16MB</td>
-			<td>4MB</td>
-		</tr>
-		<tr>
-			<td>RTC</td>
-			<td>External 32K</td>
-			<td>Built-in (less accurate)</td>
-		</tr>
-		<tr>
-			<td>Cellular Module</td>
-			<td>Integrated 4G LTE CAT4 module</td>
-			<td>Optional cellular module</td>
-		</tr>
-		<tr>
-			<td>GNSS</td>
-			<td>Integrated M8030 10Hz GNSS module and antenna</td>
-			<td>Via external GNSS receiver</td>
-		</tr>
-		<tr>
-			<td>External I/O</td>
-			<td>2x GPIO for digital I/O, analog input, serial UART etc.</td>
-			<td>Occupied if GNSS receiver is connected</td>
-		</tr>
-		<tr>
-			<td>Co-Processor Features</td>
-			<td>Vehicle ECU interfacing<br>
-			GNSS data processing</td>
-			<td>Vehicle ECU interfacing</td>
-		</tr>
-		<tr>
-			<td>Heavy Vehicle Support</td>
-			<td>HD-OBD connector, 24V system, SAE J1939</td>
-			<td>N/A</td>
-		</tr>
-	</tbody>
-</table>
+|                       |     Model H                                            |<a href="https://freematics.com/store/index.php?route=product/product&amp;product_id=85">Model A</a>|
+| :---                  |     :---                                               |    :---                                |
+| RAM Configuration     | 520KB IRAM + 8MB PSRAM                                 | 520KB IRAM                             |
+| Flash Memory          | 16MB           									     | 4MB                                    |
+| RTC                   | External 32K                                           | Built-in (less accurate)               |
+| Cellular Module       | Integrated 4G LTE CAT4 module                          | Optional cellular module               |
+| GNSS                  | Integrated M8030 10Hz GNSS module and antenna          | Via external GNSS receiver             |
+| External I/O          | 2x GPIO for digital I/O, analog input, serial UART etc | Occupied if GNSS receiver is connected |
+| Co-Processor Features | Vehicle ECU interfacing</br> GNSS data processing      | Vehicle ECU interfacing                |
+| Heavy Vehicle Support | HD-OBD connector, 24V system, SAE J1939                | N/A                                    |
 
 <!-- Informações do simulador OBD-II Emulator
 	Utilizado em testes de bancada
