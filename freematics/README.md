@@ -205,7 +205,9 @@ O emulador OBD-II MK2 do Freematics OBD pode ser controlado remotamente via BLE 
 -------
 
 ##### PC GUI Software
-Link de guia para utlizar o Software do Emulador no computador: <a href="https://freematics.com/pages/products/freematics-obd-emulator-mk2/">OBD PC</a>
+
+Um software GUI de código aberto desenvolvido para configurar e controlar o emulador. Link de guia para utlizar o Software do Emulador no computador: <a href="https://freematics.com/pages/products/freematics-obd-emulator-mk2/">OBD PC</a>
+<a href="https://freematics.com/software/freematics-obd-emulator-gui/">Guia da GUI</a>
 
 <div>
     <img src="./assets/images/Freematics_Emulator_GUI_OBD_PIDs.png" alt="Freematics_Emulator_GUI_OBD_PIDs">
