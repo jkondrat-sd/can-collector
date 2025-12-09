@@ -38,7 +38,7 @@ Esse projeto tem por objetivo a coleta, e o envio de dados veiculares para a pla
 - Nível de Segurança:
     >  O prejeto conta com o uso de SSL/TLS para garantir uma comunicação segura entre o dispositivo e a plataforma. O dispositivo utliza um CA x509 para garantir a segurança durante a comunicação.
 
-<img src="./assets/images/Arquitetura.jpg">
+<img src="./assets/images/Arquitetura.jpg" alt="Diagrama_da_Aplicação">
 
 <!-- <a href="./docs/DOCS.md">Documentação detalhada sobre as funcionalidades do código.</a> -->
 ----------------
@@ -162,8 +162,8 @@ Informações das bibliotecas utilizadas no código.
 | Mobile Network Bands | LTE-TDD B38/B40/B41<br>LTE-FDDB1/B3/B5/B7/B8/B20<br>UMTS/HSPA+ B1/B5/B8<br>GSM/GPRS/EDGEB3/B8 | <p>LTE-FDD B2/B4/B12<br> UMTS/HSPA+ B2/B5</p> |
 | Regions              | Europe, Asia, Australia                                                                       | North America (AT&amp;T Certified)            |
 
-| SIM7600E-H | SIM7600A-H |
-| :--- | :---|
+|                     | SIM7600E-H & SIM7600A-H |
+| :---                | :---                    |
 | Data Transfer Speed | LTE CAT4: Uplink up to 50Mbps, Downlink up to 150Mbps<br> HSPA+: Uplink up to 5.76Mbps, Downlink up to 42 Mbps<br> UMTS: Uplink/Downlink up to 384Kbps<br>EDGE: Uplink/Downlink up to 236.8Kbps<br>GPRS: Uplink/Downlink up to 85.6Kbps|
 
 
@@ -184,3 +184,30 @@ Informações das bibliotecas utilizadas no código.
 	Utilizado em testes de bancada
 	colocar links
  -->
+
+#### Freematics OBD Emulator MK2
+>Esse dispositivo foi utilizado para realizar testes no Freematics OBD, simulando as funcionalidades de uma rede CAN, enviando dados fictícios. Essas funcionalidade incluem a velocidade, temperatura âmbiente, aceleração etc.
+<a href="https://freematics.com/store/index.php?route=product/product&product_id=71">Freematics OBD Emulator MK2</a>
+<img src="./assets/images/IMG_8897-500x500.jpg" alt="Freematics OBD-II Emulator MK2">
+
+-------
+
+##### Android App
+
+O emulador OBD-II MK2 do Freematics OBD pode ser controlado remotamente via BLE (Bluetooth Low Energy) pelo aplicativo Freematics Controller. Apenas um subconjunto dos recursos da interface gráfica do usuário (GUI) para PC está disponível no aplicativo.
+<div>
+    <img src="./assets/images/appscreen1-138x300.jpg" alt="AndroidApp1">
+    <img src="./assets/images/appscreen2-138x300.jpg" alt="AndroiApp2">
+    </div>
+
+<!--Esse é um dispositivo que simula informações de rede CAN para o Freematics OBD.-->
+
+-------
+
+##### PC GUI Software
+Link de guia para utlizar o Software do Emulador no computador: <a href="https://freematics.com/pages/products/freematics-obd-emulator-mk2/">OBD PC</a>
+
+<div>
+    <img src="./assets/images/Freematics_Emulator_GUI_OBD_PIDs.png" alt="Freematics_Emulator_GUI_OBD_PIDs">
+    <img src="./assets/images/Freematics_Emulator_GUI_Readiness_Monitor.png" alt="Freematics_Emulator_GUI_Readiness_Monitor">
+</div>
