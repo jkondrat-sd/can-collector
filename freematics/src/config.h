@@ -1,3 +1,48 @@
+// ThingsBoard config
+#define THINGSBOARD_ENABLE_DEBUG
+#define USING_HTTPS // true // using HTTP protocol
+#define ENCRYPTED true // TLS
+#define THINGSBOARD_ENABLE_PSRAM 1
+#define THINGSBOARD_ENABLE_DYNAMIC 1
+const char* TOKEN = "";
+const char* THINGSBOARD_SERVER = "";
+
+// STATES
+// states
+#define STATE_STORAGE_READY 0x1
+#define STATE_OBD_READY 0x2
+#define STATE_GPS_READY 0x4
+//#define STATE_MEMS_READY 0x8
+#define STATE_NET_READY 0x10
+#define STATE_GPS_ONLINE 0x20
+#define STATE_CELL_CONNECTED 0x40
+#define STATE_WIFI_CONNECTED 0x80
+#define STATE_WORKING 0x100
+#define STATE_STANDBY 0x200
+
+// ELEMENT TYPES
+#define EVENT_LOGIN 1
+#define EVENT_LOGOUT 2
+#define EVENT_SYNC 3
+#define EVENT_RECONNECT 4
+#define EVENT_COMMAND 5
+#define EVENT_ACK 6
+#define EVENT_PING 7
+
+#define BUFFER_STATE_EMPTY 0
+#define BUFFER_STATE_FILLING 1
+#define BUFFER_STATE_FILLED 2
+#define BUFFER_STATE_LOCKED 3
+
+#define ELEMENT_UINT8 0
+#define ELEMENT_UINT16 1
+#define ELEMENT_UINT32 2
+#define ELEMENT_INT32 3
+#define ELEMENT_FLOAT 4
+#define ELEMENT_FLOAT_D1 5 /* floating-point data with 1 decimal place*/
+#define ELEMENT_FLOAT_D2 6 /* floating-point data with 2 decimal places*/
+// ELEMENT TYPES
+
 #ifndef CONFIG_H_INCLUDED
 #define CONFIG_H_INCLUDED
 
@@ -80,8 +125,8 @@
 #ifndef ENABLE_WIFI
 #define ENABLE_WIFI 1
 // WiFi settings
-// #define WIFI_SSID ""
-// #define WIFI_PASSWORD ""
+#define WIFI_SSID "wifi_name"
+#define WIFI_PASSWORD "123123123"
 #endif 
 
 #ifndef SERVER_HOST
@@ -93,7 +138,7 @@
 #endif
 
 // SIM card setting
-#define SIM_CARD_PIN ""
+#define SIM_CARD_PIN "1234"
 #define APN_USERNAME NULL
 #define APN_PASSWORD NULL
 
@@ -185,20 +230,6 @@
 #ifndef ENABLE_BLE
 #define ENABLE_BLE 1
 #endif
-
-// print data obd in cli
-#ifndef CLI_LOGS
-#define CLI_LOGS 1
-#endif
-
-// ThingsBoard Config
-#define THINGSBOARD_ENABLE_DEBUG
-#define USING_HTTPS true // using HTTP protocol
-#define ENCRYPTED true // TLS
-
-#define THINGSBOARD_ENABLE_DYNAMIC 1
-
-#define BEEP_CONFIG false
 
 
 #endif // CONFIG_H_INCLUDED

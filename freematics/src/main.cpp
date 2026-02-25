@@ -4,21 +4,16 @@
 #include <FreematicsOBD.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
-/*
+
 #include <Arduino_HTTP_Client.h>
 #include <ThingsBoardHttp.h>
 #include <ThingsBoard.h>
-*/
+
 #include <ArduinoJson.h>
 
 #include "config.h"
-// libs SD card
-// #include "datalogger.h"
-#include "telestore.h"
-#include <SD.h>
-#include <FS.h>
-#include <SPIFFS.h>
-#include <SPI.h>
+// lib SD card
+#include "FreematicsSD.h"
 
 #include <HttpClient.h>
 
@@ -37,10 +32,7 @@ FreematicsESP32 freematics;
 COBD obd;
 GPS_DATA* gd;
 
-const char* WIFI_SSID = "ssidWifi";
-const char* WIFI_PASSWORD = "123123";
-const char* TOKEN = "tokentoken";
-const char* THINGSBOARD_SERVER = "mobilidade.inmetro.gov.br";
+#define HTTP_POST_PATH "Content-Type: application/json"
 
 // macros
 #ifdef ENCRYPTED
@@ -54,8 +46,8 @@ WiFiClientSecure wifiClient;
     WiFiClient wifiClient;
 #endif
 
-// Arduino_HTTP_Client httpClient(wifiClient, THINGSBOARD_SERVER, THINGSBOARD_PORT);
-// ThingsBoardHttp tb(httpClient, TOKEN, THINGSBOARD_SERVER, THINGSBOARD_PORT, true, 2048);
+Arduino_HTTP_Client httpClient(wifiClient, THINGSBOARD_SERVER, THINGSBOARD_PORT);
+ThingsBoardHttp tb(httpClient, TOKEN, THINGSBOARD_SERVER, THINGSBOARD_PORT, true, 1024);
 // ThingsBoardHttp tb(httpClient, TOKEN, THINGSBOARD_SERVER, THINGSBOARD_PORT);
 
 struct VehicleData {
@@ -65,6 +57,7 @@ struct VehicleData {
     float voltage = 0;
     uint32_t timestamp = 0;
 };
+
 
 struct GpsData {
   float lat = 0;
@@ -145,160 +138,128 @@ private:
     byte m_state = 0;
 };
 
-class SerialDataOutput : public FileLogger
-{
-    void write(const char* buf, byte len)
-    {
-#if ENABLE_SERIAL_OUT
-        Serial.println(buf);
-#endif
-    }
-};
 
 DataLogger logger;
-
-// SD card
-// SDLogger store(new SerialDataOutput);
-
-SDLogger store;
 
 int fileid = 0;
 uint16_t lastSizeKB = 0;
 
 // functions 
 bool initWifi();
+void collectCan();
+void collectGps();
+void collectGyro();
 void taskFreematics(void *pvParameters);
-void pvThingsBoardServer(void *pvParameters);
 
-void taskFreematics(void *pvParameters) {
-    while(initObd == false) {
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-
-    for(int i = 0; i < 5; i++) {
-        if(initGps) {
-            break;
+void collectFreematicsData(void *pvParameters) {
+    TaskSD taskSD;
+    taskSD.checkSD(); // chech and init SD card
+    taskSD.fileSD();	// Create new file
+    int saveData = 0;
+    
+    for(;;){
+        if (initObd) {
+            collectCan();
         }
-        Serial.println("Waiting init GPS.");
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-
-    for(int i = 0; i < 5; i++) {
-        if(initMems) {
-            break;
+        if (initGps) {
+            collectGps();
         }
-        Serial.println("Waiting init MEMS.");
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-
-    for(int i = 0; i < 5; i++) {
-        if(initSD) {
-            break;
+        if (initMems) {
+            collectGyro();
         }
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-
-    for(;;) {
-        if (obd.getState() == OBD_CONNECTED) {
-
-            byte count = obd.readPID(pids,5,values);
-           /*
-	    uint8_t dataList[2] = {(uint8_t)vehicleData.speed, (uint8_t)vehicleData.rpm};
-            uint8_t valueObd[5];
-            int valueObd_0;
-            for(int i = 0; i < 5; i++) {
-                obd.readPID(pids[i], valueObd_0);
-                valueObd[i] = valueObd_0;
-            }
-            uint32_t valuesData[] = {(uint32_t)1024};
-            uint32_t valuesData02[] = {(uint32_t)values[1]};
-            for(int i = 0;i < 15;i++) {
-                store.log(PID_SPEED, valuesData, (uint8_t)count);
-                store.log(PID_SPEED, valuesData, (uint8_t)count);
-                store.log(PID_SPEED, valuesData, (uint8_t)count);
-                store.log(PID_SPEED, valuesData, (uint8_t)count);
-                store.log(PID_SPEED, valuesData, (uint8_t)count);
-
-            }*/ 
-            if (count > 0) {
-                mutexVehicle.lock();
-                vehicleData.speed = values[0];
-                vehicleData.rpm = values[1];
-                vehicleData.temperature = values[2];
-                vehicleData.timestamp = millis();
-                mutexVehicle.unlock();
-                Serial.printf("[OBD] speed: %d km/h, RPM: %d, temp: %d°C, throttle: %d, maf: %d\n", values[0], values[1], values[2], values[3], values[4]);
+        if (taskSD.statusSD()) {
+            if (initObd) {
+                taskSD.logData("rpm",vehicleData.rpm);
+                taskSD.logData("speed",vehicleData.speed);
+                taskSD.logDataFloat("temperature",vehicleData.temperature);
             }
 
-            static uint32_t lastVoltageRead = 0;
-            if (millis() - lastVoltageRead > 5000) {
-                float voltage = obd.getVoltage();
-                vehicleData.voltage = voltage;
-                lastVoltageRead = millis();
-                Serial.printf("[OBD] Voltage: %.2f V\n", voltage);
+            if (initGps) {
+                taskSD.logDataFloat("gps_alt", gpsData.altitude);
+                taskSD.logDataFloat("gps_lat", gpsData.lat);
+                taskSD.logDataFloat("gps_lng", gpsData.lng);
+                taskSD.logDataFloat("gps_speed", gpsData.speed);
+                taskSD.logData("gps_sat", gpsData.satellites);
+                taskSD.logData("gps_timestamp", gpsData.timestamp);
             }
+
+            if (initMems) {
+                taskSD.logDataMultiFloat("gyro", dataMEMS.gyro[0],dataMEMS.gyro[1], dataMEMS.gyro[2]);
+                taskSD.logDataMultiFloat("accel", dataMEMS.accel[0],dataMEMS.accel[1], dataMEMS.accel[2]);
+                taskSD.logDataMultiFloat("mag", dataMEMS.mag[0],dataMEMS.mag[1], dataMEMS.mag[2]);
+            }
+            if (taskSD.size()/(1024*1024*1024) >= 1) {
+                Serial.printf("File size: %dGB",taskSD.size()/(1024*1024*1024));
+            } else if(taskSD.size()/(1024*1024) >= 1) {
+                Serial.printf("\nFile size: %dMB\n", taskSD.size()/(1024*1024));
+            } else if(taskSD.size()/1024 >= 1) {
+    	        Serial.printf("\nFile size: %dKB\n", taskSD.size()/1024);
+            } else {
+                Serial.printf("\nFile size: %dB\n", taskSD.size());
+            }
+
         } else {
-            Serial.println("[OBD] Disconnected, trying to reconnect... ");
-            obd.init(PROTO_AUTO, true);
+            taskSD.checkSD();
+            taskSD.fileSD();
         }
-
-        if(initGps)
-        {
-            if (freematics.gpsGetData(&gd)) {
-                mutexGPS.lock();
-                gpsData.lat = gd->lat;
-                gpsData.lng = gd->lng;
-                gpsData.altitude = gd->alt;
-                gpsData.speed = gd->speed * 1.852; // Convert from knots to km/h
-                gpsData.satellites = gd->sat;
-                gpsData.timestamp = millis();
-                mutexGPS.unlock();
-                Serial.printf("[GPS] Lat: %.6f, Lng: %.6f, Alt: %.1fm, Vel: %.1f km/h, Sats: %d\n", gd->lat, gd->lng, gd->alt, gd->speed * 1.852, gd->sat);
-            }
+        if (saveData >= 50) {
+            taskSD.tempClose();
+            taskSD.tempOpen();
+            saveData = 0;
         }
-
-        if(initMems)
-        {
-            mutexMEMS.lock();
-            mems->read(dataMEMS.accel,dataMEMS.gyro, dataMEMS.mag);
-            mutexMEMS.unlock();
-            
-            Serial.println("Acc     Gyro    Mag");
-            for(int i = 0; i <= 2; i++) {
-                 Serial.printf("%f     %f    %f\n", dataMEMS.accel[i], dataMEMS.gyro[i], dataMEMS.mag[i]);
-             }
-            Serial.println("");
-        }
-
-        if (initSD) 
-        {
-            /*
-            mutexVehicle.lock();
-            writeSD.log(PID_SPEED,ELEMENT_UINT16, &value);
-            writeSD.log(PID_RPM, vehicleData.rpm);
-            writeSD.log(PID_AMBIENT_TEMP, vehicleData.temperature);
-            writeSD.log(PID_TIMESTAMP, vehicleData.timestamp);
-            mutexVehicle.unlock();
-
-            mutexGPS.lock();
-            writeSD.log(PID_GPS_ALTITUDE, gpsData.altitude);
-            writeSD.log(PID_GPS_LATITUDE, gpsData.lat);
-            writeSD.log(PID_GPS_LONGITUDE, gpsData.lng);
-            writeSD.log(PID_GPS_SPEED, gpsData.speed);
-            writeSD.log(PID_GPS_SAT_COUNT, gpsData.satellites);
-            writeSD.log(PID_GPS_TIME, gpsData.timestamp);
-            mutexGPS.unlock();
-
-            mutexMEMS.lock();
-            store.log(PID_ACC, dataMEMS.accel[0],dataMEMS.accel[1], dataMEMS.accel[2]);
-            store.log(PID_GYRO, dataMEMS.gyro[0], dataMEMS.gyro[1], dataMEMS.gyro[2]);
-            mutexMEMS.unlock();
-            */
-        }
-        // mutexGPS.lock();
-        // mutexGPS.unlock();
-
+        saveData++;
         vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+}
+
+void collectCan() {
+    obd.readPID(pids,5,values);
+    if (obd.getState() == OBD_CONNECTED) {
+        byte count = obd.readPID(pids,5,values);
+        if (count > 0) {
+            mutexVehicle.lock();
+            vehicleData.speed = values[0];
+            vehicleData.rpm = values[1];
+            vehicleData.temperature = values[2];
+            vehicleData.timestamp = millis();
+            mutexVehicle.unlock();
+            Serial.printf("[OBD] speed: %d km/h, RPM: %d, temp: %d°C, throttle: %d, maf: %d\n", values[0], values[1], values[2], values[3], values[4]);
+        }
+        static uint32_t lastVoltageRead = 0;
+        if (millis() - lastVoltageRead > 5000) {
+            float voltage = obd.getVoltage();
+            vehicleData.voltage = voltage;
+            lastVoltageRead = millis();
+            Serial.printf("[OBD] Voltage: %.2f V\n", voltage);
+        }
+    } else {
+        Serial.println("[OBD] Disconnected, trying to reconnect... ");
+        obd.init(PROTO_AUTO, true);
+    }
+}
+
+void collectGps() {
+    if (freematics.gpsGetData(&gd)) {
+        mutexGPS.lock();
+        gpsData.lat = gd->lat;
+        gpsData.lng = gd->lng;
+        gpsData.altitude = gd->alt;
+        gpsData.speed = gd->speed * 1.852; // Convert from knots to km/h
+        gpsData.satellites = gd->sat;
+        gpsData.timestamp = millis();
+        mutexGPS.unlock();
+        Serial.printf("[GPS] Lat: %.6f, Lng: %.6f, Alt: %.1fm, Vel: %.1f km/h, Sats: %d\n", gd->lat, gd->lng, gd->alt, gd->speed * 1.852, gd->sat);
+    }
+}
+
+void collectGyro() {
+    mutexMEMS.lock();
+    mems->read(dataMEMS.accel,dataMEMS.gyro, dataMEMS.mag);
+    mutexMEMS.unlock();
+    
+    Serial.println("Acc\tGyro\tMag");
+    for(int i = 0; i <= 2; i++) {
+        Serial.printf("%2f\t%2f\t%2f\n", dataMEMS.accel[i], dataMEMS.gyro[i], dataMEMS.mag[i]);
     }
 }
 
@@ -340,7 +301,6 @@ bool initWifi() {
         // wifiClient.setCACert(); // CA for HTTPS
         return true;
     } else {
-        // ESP_LOGE("WIFI","Failed to start the WiFi!");
         Serial.println("[WIFI] Failed to start the WiFi!");
         connectedWifi = false;
         return false;
@@ -348,7 +308,7 @@ bool initWifi() {
 }
 
 void modulesStatus() {
-    Serial.printf("Status Device OBD: %s, GPS: %s, MEMS: %s, SD: %s, Wifi: %s\n", initObd ? "true":"false", initGps ? "true":"false", initMems ? "true":"false", initSD ? "true":"false", connectedWifi ? "connected":"desconnected");
+    Serial.printf("\nStatus Device OBD: %s,\t GPS: %s,\t MEMS: %s,\t SD: %s,\t Wifi: %s\n", initObd ? "true":"false", initGps ? "true":"false", initMems ? "true":"false", initSD ? "true":"false", connectedWifi ? "connected":"desconnected");
 }
 
 void setup() 
@@ -420,102 +380,31 @@ void setup()
         } 
         Serial.println("NO");
     } while (0);
-    // init SD
-    /*
-    Serial.println("");
-    int volsize = store.begin();
-    if (volsize > 0) {
-        Serial.println(volsize);
-        Serial.println("MB");
-        logger.setState(STATE_STORE_READY);
-        initSD = true;
-    } else {
-        Serial.println("Fail in init SD card");
-        initSD = false;
-    }
-    */
-   if(!logger.checkState(STATE_STORE_READY)) {
-        if(store.init()) {
-            logger.setState(STATE_STORE_READY);
-        }
-   }
-   if (logger.checkState(STATE_STORE_READY)) {
-        fileid = store.begin();
-   }
+
     // init WiFi
     initWifi();
 
     // FreeRTOS Tasks
     xTaskCreatePinnedToCore(
-        taskFreematics,
-        "TaskFreematcs",
+        collectFreematicsData,
+        "collectFreematicsData",
         8192,
         NULL,
         2,
         NULL,
         1
     );
-
-    // xTaskCreatePinnedToCore(
-    //     pvThingsBoardServer,
-    //     "ThingsBoardServer",
-    //     2048,
-    //     NULL,
-    //     2,
-    //     NULL,
-    //     0
-    // );
 }
 
+bool newData = false;
+bool waitingNewData = false;
 
 void loop()
 {
-    if (connectedWifi == false) {
+    while (!connectedWifi) {
         initWifi();
     }
 
-    // if (obd.getState() == OBD_CONNECTED) {
-
-    //     byte count = obd.readPID(pids,5,values);
-
-    //     if (count > 0) {
-    //         vehicleData.speed = values[0];
-    //         vehicleData.rpm = values[1];
-    //         vehicleData.temperature = values[2];
-    //         vehicleData.timestamp = millis();
-    //         Serial.printf("[OBD] speed: %d km/h, RPM: %d, temp: %d°C, throttle: %d, maf: %d\n", values[0], values[1], values[2], values[3], values[4]);
-    //     }
-        
-    //     static uint32_t lastVoltageRead = 0;
-    //     if (millis() - lastVoltageRead > 5000) {
-    //         float voltage = obd.getVoltage();
-    //         vehicleData.voltage = voltage;
-    //         lastVoltageRead = millis();
-    //         Serial.printf("[OBD] Voltage: %.2f V\n", voltage);
-    //     }
-    // } else {
-    //     Serial.println("[OBD] Disconnected, trying to reconnect... ");
-    //     obd.init(PROTO_AUTO, true);
-    // }
-
-    // if (freematics.gpsGetData(&gd)) {
-    //     gpsData.lat = gd->lat;
-    //     gpsData.lng = gd->lng;
-    //     gpsData.altitude = gd->alt;
-    //     gpsData.speed = gd->speed * 1.852; // Convert from knots to km/h
-    //     gpsData.satellites = gd->sat;
-    //     gpsData.timestamp = millis();
-    //     Serial.printf("[GPS] Lat: %.6f, Lng: %.6f, Alt: %.1fm, Vel: %.1f km/h, Sats: %d\n", gd->lat, gd->lng, gd->alt, gd->speed * 1.852, gd->sat);
-    // }
-    /*
-    mems->read(dataMEMS.accel,dataMEMS.gyro, dataMEMS.mag);
-    Serial.println("Acc     Gyro    Mag");
-    for(int i = 0; i <= 2; i++) {
-        Serial.printf("%f     %f    %f\n", dataMEMS.accel[i], dataMEMS.gyro[i], dataMEMS.mag[i]);
-    }
-    Serial.println("");
-    */
-    // Serial.printf("%d",mems->read(dataMEMS.accel));
     if(initObd) {
         mutexVehicle.lock();
         dataServer.speed = vehicleData.speed;
@@ -524,7 +413,7 @@ void loop()
         dataServer.timestamp = vehicleData.timestamp;
         mutexVehicle.unlock();
     }
-    
+
     if(initGps) {
         mutexGPS.lock();
         dataServer.gps_altitude = gpsData.altitude;
@@ -541,7 +430,6 @@ void loop()
         for(int i = 0; i <= 2; i++) {
             dataServer.mems_accel[i] = dataMEMS.accel[i];
             dataServer.mems_gyro[i] = dataMEMS.gyro[i];
-            // Serial.printf("ACC: %f GYRO: %f", dataServer.mems_accel[i], dataServer.mems_gyro[i]);
         }
         dataServer.mems_orientation = dataMEMS.orientation;
         dataServer.mems_temperature = dataMEMS.temperature;
@@ -550,7 +438,7 @@ void loop()
     }
 
     // Teste Json
-    StaticJsonDocument<512> doc;
+    StaticJsonDocument<1024> doc;
 
     doc["gps_lat"] = dataServer.gps_lat;
     doc["gps_lng"] = dataServer.gps_lng;
@@ -558,7 +446,7 @@ void loop()
     doc["gps_satellites"] = dataServer.gps_satellites;
     doc["gps_speed"] = dataServer.gps_speed;
     doc["gps_timestamp"] = dataServer.gps_timestamp;
-    
+
     doc["speed"] = dataServer.speed;
     doc["rpm"] = dataServer.rpm;
     doc["ttemperature"] = dataServer.temperature;
@@ -583,51 +471,19 @@ void loop()
     Serial.print(jsonSize);
     Serial.print(" bytes): ");
     Serial.println(payload);
-    
-    /*
-    if(connectedWifi) {
-        for(int i = 0; i < 5; i++) {
-            break;
-            if(tb.sendTelemetryJson(doc, jsonSize)) {
-                break;
-            }
-        }
-        // tb.sendTelemetryData("homeTeste",123);
-    }
-    */
-
-    
-    doc.clear();
 
     postData(payload, THINGSBOARD_SERVER, TOKEN);
 
-    /*
-    http.begin("https://" + String(THINGSBOARD_SERVER) + "/api/v1/" + TOKEN  + "/telemetry");
-    http.addHeader("Content-Type", "application/json");
-
-    String payload_2 = "{\"teste\":456}";
-    int httpCode = http.POST(payload);
-
-    Serial.print("HTTP Code: "); Serial.println(httpCode);
-    if (httpCode > 0) {
-        String response = http.getString();
-        Serial.println("Resposta: " + response);
-    } else {
-        Serial.println("Falha na conexão HTTP");
-    }
-    http.end();
-    */
-    modulesStatus();
-
-    /*if(connectedWifi) {
-
-        tb.sendTelemetryData("multithreading","teste");
-        tb.sendTelemetryData("speed", dataServer.speed);
-        tb.sendTelemetryData("rpm", dataServer.rpm);
-        tb.sendTelemetryData("temperature", dataServer.temperature);
-        tb.sendTelemetryData("timestamp", dataServer.timestamp);
-        tb.sendTelemetryData("gps_speed", dataServer.gps_speed);
+    doc["ThingsboardStatus"] = "sucesso";
+    if(tb.sendTelemetryJson(doc, jsonSize)){ 
+        Serial.println("Sucesso");
         
-    }*/
+    } else {
+        Serial.println("Falha");
+    }
+    doc.clear();
+
+    modulesStatus(); // print Status modules
+
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
