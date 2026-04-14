@@ -54,7 +54,10 @@ envio de uma requisição para RPM(0x0C):
 > cansend 7DF#02.01.0C.00.00.00.00.00
 
 Abra um segundo terminal e execute:
-> candump can0 # esse comando permite ver as respostas da rede CAN mesmo que utilize o código python ou digite os comandos diretemente pelo terminal
+```sh
+candump can0
+```
+Esse comando permite ver as respostas da rede CAN mesmo que utilize o código python ou digite os comandos diretemente pelo terminal.
 
 resposta do emulador MK2:
 > 7E8# 04 41 0C 07 D0 00 00 00
