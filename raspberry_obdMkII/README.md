@@ -44,13 +44,13 @@ O Raspberry Pi realiza a leitura da rede CANbus através do módulo Pican2, repo
 
 > ISO 15765-4 CAN (11 bit ID,500 Kbaud)
 
-formato da mensagem da CAN OBDII, segundo a ISO 15765-4 com a configuração de velocidade 500 Kbaud e tamhano da mensagem de 11 bit ID.
+Formato da mensagem da CAN OBDII, segundo a ISO 15765-4 com a configuração de velocidade 500 Kbaud e tamhano da mensagem de 11 bit ID.
 
 > \<CAN ID>#\<tamanho da mensagem>.<serviço/modo>.\<PID>.00.00.00.00.00
 
-exemplo:
+Exemplo:
 
-envio de uma requisição para RPM(0x0C):
+Envio de uma requisição para RPM(0x0C):
 > cansend 7DF#02.01.0C.00.00.00.00.00
 
 Abra um segundo terminal e execute:
@@ -59,7 +59,7 @@ candump can0
 ```
 Esse comando permite ver as respostas da rede CAN mesmo que utilize o código python ou digite os comandos diretemente pelo terminal.
 
-resposta do emulador MK2:
+Resposta do emulador MK2:
 > 7E8# 04 41 0C 07 D0 00 00 00
 
 O valor do pid solicitado se encontra após hex 0x0C, no caso o valor de RPM. Sendo esse valor "07 D0 00 00 00". Converta a respota de hexadecimal para decimal e depois aplique os valores à <a href="https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_01_-_Show_current_data">fómula de RPM</a>:
