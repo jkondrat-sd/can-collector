@@ -13,10 +13,14 @@ O Raspberry Pi realiza a leitura da rede CANbus através do módulo Pican2, repo
 #### Configuração da rede CANbus no Raspberry Pi
 
 ```sh
-    # Requisitos
+    # Requisitos para o sistema operacional
     sudo apt-get update
     sudo apt-get upgrade
     sudo apt install can-utils
+
+    #requisitos python3
+    can 0.0.0
+    python-can 4.6.1
 
     # Abra o arquivo de configuração da rede CANbus:
     sudo nano boot/config.txt
@@ -30,7 +34,10 @@ O Raspberry Pi realiza a leitura da rede CANbus através do módulo Pican2, repo
     sudo /sbin/ip link set can0 up type can bitrate 500000
 
     # Teste a insterface com o comando abaixo:
-    cansend can0 7DF#02010C0000000000 
+    cansend can0 7DF#02010C0000000000
+
+    # Após seguir todas as etapas execute o código main.py
+    python3 main.py
 ```
 
 #### Detalhes da comunicação
@@ -46,6 +53,9 @@ exemplo:
 envio de uma requisição para RPM(0x0C):
 > cansend 7DF#02.01.0C.00.00.00.00.00
 
+Abra um segundo terminal e execute:
+> candump can0 # esse comando permite ver as respostas da rede CAN mesmo que utilize o código python ou digite os comandos diretemente pelo terminal
+
 resposta do emulador MK2:
 > 7E8# 04 41 0C 07 D0 00 00 00
 
@@ -53,7 +63,7 @@ O valor do pid solicitado se encontra após hex 0x0C, no caso o valor de RPM. Se
     
     A=07 B=D0 C=00 D=00 E=00
 
-    fórmula RPM:
+    fórmula de RPM:
         (256 * A)+B/4
 
     hex para dec:
