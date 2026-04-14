@@ -12,7 +12,6 @@ O Raspberry Pi realiza a leitura da rede CANbus através do módulo Pican2, repo
 
 #### Configuração da rede CANbus no Raspberry Pi
 
-Requisitos:
 sh```
     # Requisitos
     sudo apt-get update
@@ -31,7 +30,8 @@ sh```
     sudo /sbin/ip link set can0 up type can bitrate 500000
 
     Teste a insterface com o comando abaixo:
-    cansend can0 7DF#02010C0000000000 ```
+    cansend can0 7DF#02010C0000000000 
+```
 
 #### Detalhes da comunicação
 
