@@ -10,6 +10,29 @@ O projeto tem por objtivo a leitura da rede <a href="">CANbus</a> do emulador MK
 O Raspberry Pi realiza a leitura da rede CANbus através do módulo Pican2, reponsável por realizar a comunicação com o emulador MK2, ele torna possível o envio e o recebimento de informações na rede. A comunição é relizada com o envio de uma mensagem em hex(<a href="https://pt.wikipedia.org/wiki/Sistema_de_numera%C3%A7%C3%A3o_hexadecimal">hexadecimal</a>), contendo um ID de identificação da rede CAN(CAN ID), o tamnho da mensagem, o <a href="https://en.wikipedia.org/wiki/OBD-II_PIDs#Services_/_Modes">serviço/modo</a> e o pid requisitado pertencente a esse mesmo serviço/modo. O emulador MK2 retorna uma resposta contendo o valor atual do pid requisitado.
 <!-- requisições específicas, contendo informações sobre o pid requisitado, o Raspberry Pi envia uma requisição contendo o tamnho da mensagem, serviço de comunicação e o pid -->
 
+#### Configuração da rede CANbus no Raspberry Pi
+
+Requisitos:
+sh```
+    # Requisitos
+    sudo apt-get update
+    sudo apt-get upgrade
+    sudo apt install can-utils
+
+    # Abra o arquivo de configuração da rede CANbus:
+    sudo nano boot/config.txt
+
+    # Adicione essas três linhas ao arquivo, e depois salve as modificações e resete o dispositivo
+    dtparam=spi=on
+    dtoverlay=mcp2515-can0-overlay,oscillator=16000000,interrupt=25
+    dtoverlay=spi-bcm2835-overlay
+
+    Subindo a interface:
+    sudo /sbin/ip link set can0 up type can bitrate 500000
+
+    Teste a insterface com o comando abaixo:
+    cansend can0 7DF#02010C0000000000 ```
+
 #### Detalhes da comunicação
 
 > ISO 15765-4 CAN (11 bit ID,500 Kbaud)
@@ -21,12 +44,12 @@ formato da mensagem da CAN OBDII, segundo a ISO 15765-4 com a configuração de 
 exemplo:
 
 envio de uma requisição para RPM(0x0C):
-> 7DF#02.01.0C.00.00.00.00.00
+> cansend 7DF#02.01.0C.00.00.00.00.00
 
 resposta do emulador MK2:
 > 7E8# 04 41 0C 07 D0 00 00 00
 
-O valor do pid solicitado se encontra após hex 0x0C, no caso o valor de RPM. Sendo esse valor "07 D0 00 00 00". Converta a respota de hexadecimal para decimal e depois aplique os valores a <a href="https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_01_-_Show_current_data">fómula de RPM</a>:
+O valor do pid solicitado se encontra após hex 0x0C, no caso o valor de RPM. Sendo esse valor "07 D0 00 00 00". Converta a respota de hexadecimal para decimal e depois aplique os valores à <a href="https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_01_-_Show_current_data">fómula de RPM</a>:
     
     A=07 B=D0 C=00 D=00 E=00
 
@@ -42,6 +65,8 @@ O valor do pid solicitado se encontra após hex 0x0C, no caso o valor de RPM. Se
         B  = 208
 
         (256*7) + 208/4 = 500
+        
+        500 RPM
 
 #### fontes
 
