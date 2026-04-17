@@ -18,10 +18,13 @@ public:
   uint32_t getDataCount();
   bool statusSD();
   void printDirectory(File dir, int numTabs);
-
+  void writeHeader(const char* buf, byte len);
   void logData(char* name, int value);
+  void logDataCan(int value);
   void logDataFloat(char* name, float value);
+  void logDataFloatCan(float value);
   void logDataMultiFloat(char* name, float value1, float value2, float value3);
+  void logDataChar(const char* value);
 
 protected:
   int getFileID(File& root) {

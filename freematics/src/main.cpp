@@ -38,6 +38,31 @@ GPS_DATA* gd;
 #ifdef ENCRYPTED
 constexpr uint16_t THINGSBOARD_PORT = 443U;
 constexpr char ROOT_CERT[] = R"(-----BEGIN CERTIFICATE-----
+MIIEqTCCA5GgAwIBAgIQd70NdT8uGWAb1U4KAkRGdjANBgkqhkiG9w0BAQsFADBM
+MSAwHgYDVQQLExdHbG9iYWxTaWduIFJvb3QgQ0EgLSBSMzETMBEGA1UEChMKR2xv
+YmFsU2lnbjETMBEGA1UEAxMKR2xvYmFsU2lnbjAeFw0yMDA3MDUwMDAwMDBaFw0y
+NzA0MjUxMTAwMDBaMFAxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWdu
+IG52LXNhMSYwJAYDVQQDEx1UcnVzdGVkIFJvb3QgVExTIENBIFNIQTI1NiBHMzCC
+ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKXRe6ZnoR+4xcoJL/S5vx1D
+qMMe4LCFB+zMMOCi5stfYUfK6bBgilYKilk42F85z5o1eLKUfj4ycGfnaUVLdSsj
+waP1HMlobr2xBMiH9+q1KgyWui1v8KRv+IhdPaxRojgLLM4jlPLlHvqvorcmGHQl
+x0wi2VM8Grqf+cdkhYXHGTBRvBLhAofAhgoWTVzrwTZ6MtAPaCATJ+gcSVQHw9LL
+XM7xVQukmUwMMpp1mixfKbmIv+DETaMk9O+kt5R4nPLt7M8lUS1CaezdivbKvvnL
+4Wnc7nXzRC/NNLtuWs+6i154Yj4a9JB19oGBrInMm673GanbB1r8IuZoROKdGakC
+AwEAAaOCAYEwggF9MA4GA1UdDwEB/wQEAwIBhjAdBgNVHSUEFjAUBggrBgEFBQcD
+AQYIKwYBBQUHAwIwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQU3k/X3Seu1X9Y
+geEsR6wjt8Z7V+8wHwYDVR0jBBgwFoAUj/BLf6guRSSuTVD6Y5qL3uLdG7wwegYI
+KwYBBQUHAQEEbjBsMC0GCCsGAQUFBzABhiFodHRwOi8vb2NzcC5nbG9iYWxzaWdu
+LmNvbS9yb290cjMwOwYIKwYBBQUHMAKGL2h0dHA6Ly9zZWN1cmUuZ2xvYmFsc2ln
+bi5jb20vY2FjZXJ0L3Jvb3QtcjMuY3J0MDYGA1UdHwQvMC0wK6ApoCeGJWh0dHA6
+Ly9jcmwuZ2xvYmFsc2lnbi5jb20vcm9vdC1yMy5jcmwwRwYDVR0gBEAwPjA8BgRV
+HSAAMDQwMgYIKwYBBQUHAgEWJmh0dHBzOi8vd3d3Lmdsb2JhbHNpZ24uY29tL3Jl
+cG9zaXRvcnkvMA0GCSqGSIb3DQEBCwUAA4IBAQAW8OVBjtYaLZ+QvyJta++B4k8B
+DklbV6XCiJaapjYbZoHssAMd4o+GDr24R0MOmm83sWLdo4gOuNlEwhSVyezr42EJ
+2QBLZEJSZwHnMpfPddc2mlZ5gMN6PECZrz4W+t2xmSgOYQi1uIHIiDAoSm4/eppe
+8/SLClJTYk/mgF5FfnmNDeOhDE+e836s83RyaVzLxTbl3ZfDSCw2WWglSbrXheWg
+ydDeEOmWtqeQjlrTmVX/UwFutWPc4W+v8xZ9KT3vcpG4PZd3ZH0GnckeNjBcFiAi
+dXm4Aymp9y9XHFAsTfHPH3UMmR7WIVc+iboT/14tlK9n2oASLiJjPaACGnpU
 -----END CERTIFICATE-----
 )";
 WiFiClientSecure wifiClient;
@@ -57,7 +82,6 @@ struct VehicleData {
     float voltage = 0;
     uint32_t timestamp = 0;
 };
-
 
 struct GpsData {
   float lat = 0;
@@ -122,10 +146,12 @@ volatile bool connectedThingsboard = false;
 
 // Data Can
 byte pids[] = {PID_SPEED, PID_RPM, PID_AMBIENT_TEMP, PID_THROTTLE, PID_MAF_FLOW};
-int values[5];
-
+const char* pidsName[] = {"speed","rpm","ambient_temp","throttle","maf_flow"};
+int values[sizeof(pids)/sizeof(pids[0])];
 // GPS config
+const char *gpsList[] = {"gps_lat","gps_lng","gps_altitude","gps_speed","gps_satellites","gps_timestamp"};
 // MEMS config
+const char *memsList[] = {"accel_x","accel_y","accel_z","gyro_x","gyro_y","gyro_z","mems_temperature","mems_timestamp"};
 // ICM_20948_I2C mems;
 MEMS_I2C* mems = 0;
 
@@ -144,6 +170,8 @@ DataLogger logger;
 int fileid = 0;
 uint16_t lastSizeKB = 0;
 
+TaskSD taskSD;
+
 // functions 
 bool initWifi();
 void collectCan();
@@ -152,11 +180,22 @@ void collectGyro();
 void taskFreematics(void *pvParameters);
 
 void collectFreematicsData(void *pvParameters) {
-    TaskSD taskSD;
-    taskSD.checkSD(); // chech and init SD card
-    taskSD.fileSD();	// Create new file
-    int saveData = 0;
+    taskSD.checkSD(); // check and init SD card
+    taskSD.fileSD();	// Create new 
     
+    for(int i = 0; i < sizeof(pidsName)/sizeof(pidsName[0]); i++) {
+        taskSD.logDataChar(pidsName[i]);
+        taskSD.logDataChar(",");
+    }
+    for (int i = 0; i < sizeof(gpsList)/sizeof(gpsList[0]); i++) {
+        taskSD.logDataChar(gpsList[i]);
+        taskSD.logDataChar(",");
+    }
+    for(int i = 0; i < sizeof(memsList)/sizeof(memsList[0]); i++) {
+        taskSD.logDataChar(memsList[i]);
+        if(i < sizeof(memsList)/sizeof(memsList[0])) taskSD.logDataChar(",");
+    }
+    taskSD.logDataChar("\n");
     for(;;){
         if (initObd) {
             collectCan();
@@ -168,47 +207,76 @@ void collectFreematicsData(void *pvParameters) {
             collectGyro();
         }
         if (taskSD.statusSD()) {
+            // writing can data in SD card
             if (initObd) {
-                taskSD.logData("rpm",vehicleData.rpm);
-                taskSD.logData("speed",vehicleData.speed);
-                taskSD.logDataFloat("temperature",vehicleData.temperature);
+                for (int i = 0; i < sizeof(values)/sizeof(values[0]); i++) {
+                    taskSD.logDataCan(values[i]);
+                    if (i < sizeof(values)/sizeof(values[0])) taskSD.logDataChar(",");
+                }
             }
-
+            // writing gps data in SD card
             if (initGps) {
-                taskSD.logDataFloat("gps_alt", gpsData.altitude);
-                taskSD.logDataFloat("gps_lat", gpsData.lat);
-                taskSD.logDataFloat("gps_lng", gpsData.lng);
-                taskSD.logDataFloat("gps_speed", gpsData.speed);
-                taskSD.logData("gps_sat", gpsData.satellites);
-                taskSD.logData("gps_timestamp", gpsData.timestamp);
+                taskSD.logDataFloatCan(gpsData.lat);
+                taskSD.logDataChar(",");
+                taskSD.logDataFloatCan(gpsData.lng);
+                taskSD.logDataChar(",");
+                taskSD.logDataFloatCan(gpsData.altitude);
+                taskSD.logDataChar(",");
+                taskSD.logDataFloatCan(gpsData.speed);
+                taskSD.logDataChar(",");
+                taskSD.logDataCan(gpsData.satellites);
+                taskSD.logDataChar(",");
+                taskSD.logDataCan(gpsData.timestamp);
+                taskSD.logDataChar(",");
+            }
+            // writing mems data in SD card
+            if (initMems) {
+                for(int i = 0; i < 3; i++){ 
+                    taskSD.logDataFloatCan(dataMEMS.accel[i]);
+                    taskSD.logDataChar(",");
+                }
+                for(int i = 0; i < 3; i++){ 
+                    taskSD.logDataFloatCan(dataMEMS.gyro[i]);
+                    if(i < 3) taskSD.logDataChar(",");
+                }                
             }
 
-            if (initMems) {
-                taskSD.logDataMultiFloat("gyro", dataMEMS.gyro[0],dataMEMS.gyro[1], dataMEMS.gyro[2]);
-                taskSD.logDataMultiFloat("accel", dataMEMS.accel[0],dataMEMS.accel[1], dataMEMS.accel[2]);
-                taskSD.logDataMultiFloat("mag", dataMEMS.mag[0],dataMEMS.mag[1], dataMEMS.mag[2]);
+            taskSD.logDataChar("\n");
+
+        if (taskSD.size()/(1024*1024*1024) >= 1) {
+            Serial.printf("File size: %dGB",taskSD.size()/(1024*1024*1024));
+            taskSD.close();
+            taskSD.fileSD();
+            // writing hearder in SD card
+            for(int i = 0; i < sizeof(pidsName)/sizeof(pidsName[0]); i++) {
+                taskSD.logDataChar(pidsName[i]);
+                taskSD.logDataChar(",");
             }
-            if (taskSD.size()/(1024*1024*1024) >= 1) {
-                Serial.printf("File size: %dGB",taskSD.size()/(1024*1024*1024));
-            } else if(taskSD.size()/(1024*1024) >= 1) {
-                Serial.printf("\nFile size: %dMB\n", taskSD.size()/(1024*1024));
-            } else if(taskSD.size()/1024 >= 1) {
-    	        Serial.printf("\nFile size: %dKB\n", taskSD.size()/1024);
-            } else {
-                Serial.printf("\nFile size: %dB\n", taskSD.size());
+            for (int i = 0; i < sizeof(gpsList)/sizeof(gpsList[0]); i++) {
+                taskSD.logDataChar(gpsList[i]);
+                taskSD.logDataChar(",");
             }
+            for(int i = 0; i < sizeof(memsList)/sizeof(memsList[0]); i++) {
+                taskSD.logDataChar(memsList[i]);
+                if(i < sizeof(memsList)/sizeof(memsList[0])) taskSD.logDataChar(",");
+            }
+
+        } else if(taskSD.size()/(1024*1024) >= 1) {
+            Serial.printf("\nFile size: %dMB\n", taskSD.size()/(1024*1024));
+        } else if(taskSD.size()/1024 >= 1) {
+    	    Serial.printf("\nFile size: %dKB\n", taskSD.size()/1024);
+        } else {
+            Serial.printf("\nFile size: %dB\n", taskSD.size());
+        }
 
         } else {
             taskSD.checkSD();
             taskSD.fileSD();
         }
-        if (saveData >= 50) {
-            taskSD.tempClose();
-            taskSD.tempOpen();
-            saveData = 0;
-        }
-        saveData++;
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        taskSD.tempClose();
+        taskSD.tempOpen();
+
+        vTaskDelay(500 / portTICK_PERIOD_MS);
     }
 }
 
@@ -301,6 +369,7 @@ bool initWifi() {
         // wifiClient.setCACert(); // CA for HTTPS
         return true;
     } else {
+        // ESP_LOGE("WIFI","Failed to start the WiFi!");
         Serial.println("[WIFI] Failed to start the WiFi!");
         connectedWifi = false;
         return false;
@@ -385,6 +454,7 @@ void setup()
     initWifi();
 
     // FreeRTOS Tasks
+
     xTaskCreatePinnedToCore(
         collectFreematicsData,
         "collectFreematicsData",
@@ -396,14 +466,15 @@ void setup()
     );
 }
 
-bool newData = false;
-bool waitingNewData = false;
-
 void loop()
 {
-    while (!connectedWifi) {
+    /*
+    if (connectedWifi == false) {
         initWifi();
     }
+    */
+
+    while (initWifi() == false);
 
     if(initObd) {
         mutexVehicle.lock();
@@ -483,7 +554,7 @@ void loop()
     }
     doc.clear();
 
-    modulesStatus(); // print Status modules
+    // modulesStatus(); // print Status modules
 
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
 }
