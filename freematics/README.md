@@ -120,6 +120,7 @@ constexpr char ROOT_CERT[] = R"(-----BEGIN CERTIFICATE-----
 constexpr uint16_t MAX_MESSAGE_SEND_SIZE = 128U; // limite de envio
 constexpr uint16_t MAX_MESSAGE_RECEIVE_SIZE = 128U; // limite de recebimento
 ``` -->
+----------------
 
 **Orientações para o cartão de memória(SD card):**
 Tamanho máximo de **32Gb**

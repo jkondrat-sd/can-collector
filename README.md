@@ -5,9 +5,8 @@
 Esse projeto tem por objetivo a coleta e o armazenamento de dados veículares através de sistemas embarcados. O projeto utilza uma plataforma IoT para o gerêciamento de dispositivos, conhecida como ThingsBoard, que permite o monitoramento, controle e armazenamento de informações. Para realizar o registro de dados cada dispositivo recebe um token da plataforma, no qual vai permitir a comunicação e o armazenamento. A comunicação é realizada através dos protocolos HTTP, HTTPS, MQTT, dentre outros. 
 
 <!--
-1. Como funciona?
-2. Qual o propósito do projeto?
-
+1. Qual o propósito do projeto?
+2. Como funciona?
 3. Quais versões do Freematics o código foi testado?
 4. Como que o distpositivo está enviando dado pro ThingBoard?(HTTP, WebSocket, ...)
 5. Qual conectividade o Freemtaics está uando?(WiFi, 5G, Bluetooth...)
