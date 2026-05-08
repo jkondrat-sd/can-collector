@@ -6,49 +6,50 @@ O projeto tem por objtivo a leitura da rede <a href="">CANbus</a> do emulador MK
 <!-- utilinzando o módulo <a href="https://copperhilltech.com/pican-2-can-bus-interface-for-raspberry-pi/">Pican2</a>. -->
 
 #### Como Funciona?
-
-O Raspberry Pi realiza a leitura da rede CANbus através do módulo Pican2, reponsável por realizar a comunicação com o emulador MK2, ele torna possível o envio e o recebimento de informações na rede. A comunição é relizada com o envio de uma mensagem em hex(<a href="https://pt.wikipedia.org/wiki/Sistema_de_numera%C3%A7%C3%A3o_hexadecimal">hexadecimal</a>), contendo um ID de identificação da rede CAN(CAN ID), o tamnho da mensagem, o <a href="https://en.wikipedia.org/wiki/OBD-II_PIDs#Services_/_Modes">serviço/modo</a> e o pid requisitado pertencente a esse mesmo serviço/modo. O emulador MK2 retorna uma resposta contendo o valor atual do pid requisitado.
-<!-- requisições específicas, contendo informações sobre o pid requisitado, o Raspberry Pi envia uma requisição contendo o tamnho da mensagem, serviço de comunicação e o pid -->
+---
+O Raspberry Pi realiza a leitura da rede CANbus através do módulo PiCAN2, reponsável por realizar a comunicação com o emulador MK2, ele torna possível o envio e o recebimento de informações na rede. A comunição é relizada com o envio de uma mensagem em hex(<a href="https://pt.wikipedia.org/wiki/Sistema_de_numera%C3%A7%C3%A3o_hexadecimal">hexadecimal</a>), contendo um ID de identificação da rede CAN(CAN ID), o tamnho da mensagem, o <a href="https://en.wikipedia.org/wiki/OBD-II_PIDs#Services_/_Modes">serviço/modo</a> e o pid requisitado pertencente a esse mesmo serviço/modo. O emulador MK2 retorna uma resposta contendo o valor atual do pid requisitado.
 
 #### Configuração da rede CANbus no Raspberry Pi
-
+---
 ```sh
-    # Requisitos para o sistema operacional
-    sudo apt-get update
-    sudo apt-get upgrade
-    sudo apt install can-utils
-
-    #requisitos python3
-    can 0.0.0
-    python-can 4.6.1
-
-    # Abra o arquivo de configuração da rede CANbus:
-    sudo nano boot/config.txt
-
-    # Adicione essas três linhas ao arquivo, e depois salve as modificações e resete o dispositivo
-    dtparam=spi=on
-    dtoverlay=mcp2515-can0-overlay,oscillator=16000000,interrupt=25
-    dtoverlay=spi-bcm2835-overlay
-
-    # Subindo a interface:
-    sudo /sbin/ip link set can0 up type can bitrate 500000
-
-    # Teste a insterface com o comando abaixo:
-    cansend can0 7DF#02010C0000000000
-
-    # Após seguir todas as etapas execute o código main.py
-    python3 main.py
+#Requisitos para o sistema operacional
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt install can-utils
+```
+```sh
+#requisitos python3
+pip install can python-can
+pip install tb-mqtt-client # thigsboard with suport for mqtt and http 
+```
+```sh
+# Abra o arquivo de configuração da rede CANbus:
+sudo nano boot/config.txt
+```
+```sh
+# Adicione essas três linhas ao arquivo "config.txt", salve as modificações e resete o dispositivo
+dtparam=spi=on
+dtoverlay=mcp2515-can0-overlay,oscillator=16000000,interrupt=25
+dtoverlay=spi-bcm2835-overlay
+```
+```sh
+# Subindo a interface:
+sudo /sbin/ip link set can0 up type can bitrate 500000
+```
+```sh
+# Teste a insterface com o comando abaixo:
+cansend can0 7DF#02010C0000000000
 ```
 
 #### Detalhes da comunicação
-
+--------
 > ISO 15765-4 CAN (11 bit ID,500 Kbaud)
 
 Formato da mensagem da CAN OBDII, segundo a ISO 15765-4 com a configuração de velocidade 500 Kbaud e tamhano da mensagem de 11 bit ID.
 
 > \<CAN ID>#\<tamanho da mensagem>.<serviço/modo>.\<PID>.00.00.00.00.00
 
-Exemplo:
+***Exemplo:***
 
 Envio de uma requisição para RPM(0x0C):
 > cansend 7DF#02.01.0C.00.00.00.00.00
@@ -81,8 +82,8 @@ O valor do pid solicitado se encontra após hex 0x0C, no caso o valor de RPM. Se
         
         500 RPM
 
-#### fontes
-
+#### Fontes
+----
 https://www.csselectronics.com/pages/obd2-explained-simple-intro</br>
 https://pt.wikipedia.org/wiki/OBD</br>
 https://en.wikipedia.org/w/index.php?title=OBD-II_PIDs</br>
