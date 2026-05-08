@@ -2,6 +2,10 @@ import can
 import time
 import sys
 
+print("="*32)
+print("||READ CAN OBD IN RASPBERRY PI||")
+print("="*32)
+
 # configuration of CAN Bus 
 INTERFACE = 'can0'
 BITRADE = 500000
