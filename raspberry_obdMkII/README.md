@@ -2,8 +2,7 @@
 
 #### Propósito do Projeto    
 <!-- Realizar a leitura da rede CAN do emuladador OBD2 MK2 utilizando o Raspberry pi -->
-O projeto tem por objtivo a leitura da rede <a href="">CANbus</a> do emulador MK2(<a href="https://freematics.com/pages/products/freematics-obd-emulator-mk2/">Freematics OBD-II Emulator MK2</a>) utilizando o <a href="">Raspberry Pi</a>. 
-<!-- utilinzando o módulo <a href="https://copperhilltech.com/pican-2-can-bus-interface-for-raspberry-pi/">Pican2</a>. -->
+O projeto tem por objtivo a leitura da rede <a href="https://en.wikipedia.org/wiki/CAN_bus">CANbus</a> do emulador MK2(<a href="https://freematics.com/pages/products/freematics-obd-emulator-mk2/">Freematics OBD-II Emulator MK2</a>) utilizando o <a href="">Raspberry Pi</a>.
 
 #### Como Funciona?
 ---
@@ -19,8 +18,8 @@ sudo apt install can-utils
 ```
 ```sh
 #requisitos python3
-pip install can python-can
-pip install tb-mqtt-client # thigsboard with suport for mqtt and http 
+pip install can python-can python-dotenv
+pip install tb-mqtt-client # thigsboard with suport for mqtt and http
 ```
 ```sh
 # Abra o arquivo de configuração da rede CANbus:
@@ -39,6 +38,15 @@ sudo /sbin/ip link set can0 up type can bitrate 500000
 ```sh
 # Teste a insterface com o comando abaixo:
 cansend can0 7DF#02010C0000000000
+```
+```sh
+# Crie um arquivo na raiz do código para adiocionar as credencias do servidor
+nano .env
+```
+```sh
+# Configurações de credencias para enviar telemetria ao servidor
+URL_SERVER ="https://mobilidade.inmetro.gov.br"
+TOKEN_DEVICE="token" # O token deve ser obtido pela plataforma
 ```
 
 #### Detalhes da comunicação

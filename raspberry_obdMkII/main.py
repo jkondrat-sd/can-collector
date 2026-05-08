@@ -1,6 +1,11 @@
+import os
 import can
+import sys
 import time
 import sys
+
+from tb_device_http import TBHTTPDevice
+from dotenv import load_dotenv
 
 # importing functions and dictionaries for web CAN
 from can_translator import *
@@ -12,6 +17,7 @@ print("="*32)
 
 
 def main():
+
     try:
         bus = can.interface.Bus(
             channel=INTERFACE,
@@ -22,6 +28,17 @@ def main():
         print(f"Error opening the interface CAN: {e}")
         sys.exit(1)
 
+    load_dotenv()
+    url_server = os.getenv("URL_SERVER")
+    token = os.getenv("TOKEN_DEVICE")
+    connection_with_thigsboard = False
+
+    if token and url_server:
+        client = TBHTTPDevice(url_server, token)
+        if(client.connect()):
+            connection_with_thigsboard = True
+    else:
+        print("Link server and token not thickened!")
     try:
         while True:
             for mode, mode_data in PIDS_.items():
@@ -38,6 +55,12 @@ def main():
                                     print(f"MODE: {mode} | PID: 0x{pid01:02X} | Description: {description} | Value: {value}")
                                 else:
                                     print(f"MODE: {mode} | PID: 0x{pid01:02X} 0x{pid02:02X} | Description: {description} | Value: {value}")
+                                
+                                if(connection_with_thigsboard):
+                                    if(client.send_telemetry({description:value}, queued=False)):
+                                        continue
+                                    else:
+                                        connection_with_thigsboard = False
                         
                 time.sleep(0.05)
             time.sleep(0.8)
