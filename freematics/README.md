@@ -121,6 +121,13 @@ constexpr uint16_t MAX_MESSAGE_SEND_SIZE = 128U; // limite de envio
 constexpr uint16_t MAX_MESSAGE_RECEIVE_SIZE = 128U; // limite de recebimento
 ``` -->
 ----------------
+
+**Orientações para o cartão de memória(SD card):**
+Tamanho máximo de **32Gb**
+O cartão deve ser particionado em **Fat32**
+Os arquivos gerados pelo código podem chegar no máximo a 1Gb de armazenamento, acima disso o dispositivos pode enfrentar conflitos em seu funcionamento. Os arquivos gerados seguem o formato <a href="https://en.wikipedia.org/wiki/Comma-separated_values">CSV</a>.
+
+----------------
 #### **Bibliotecas**
 
 <!-- Bibliotecas utilizadas no código e suas respectivas versões.  -->

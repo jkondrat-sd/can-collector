@@ -87,8 +87,13 @@ void TaskSD::write(const char* buf, byte len) {
   myFile.print(m_dataCount);
   myFile.write(',');
   myFile.write((uint8_t*)buf, len);
-  myFile.write('\n');
+  // myFile.write('\n');
   m_dataCount++;
+}
+
+void TaskSD::writeHeader(const char* buf, byte len) {
+  if (m_next) m_next->write(buf,len);
+  myFile.write((uint8_t*)buf, len);
 }
 
 void TaskSD::close() {
@@ -164,10 +169,27 @@ void TaskSD::logData(char* name, int value) {
   write(buf, len);
 }
 
+void TaskSD::logDataCan(int value) {
+  char buf[24];
+  byte len = sprintf(buf,"%d",value);
+  writeHeader(buf, len);
+}
+
+void TaskSD::logDataChar(const char* value) {
+  char buf[30];
+  byte len = sprintf(buf, "%s", value);
+  writeHeader(buf, len);
+}
 void TaskSD::logDataFloat(char* name, float value) {
   char buf[25];
   byte len = sprintf(buf, "%s,%2f", name, value);
   write(buf, len);
+}
+
+void TaskSD::logDataFloatCan(float value) {
+  char buf[25];
+  byte len = sprintf(buf, "%2f", value);
+  writeHeader(buf, len);
 }
 
 void TaskSD::logDataMultiFloat(char* name, float value1, float value2, float value3) {
