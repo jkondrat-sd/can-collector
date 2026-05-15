@@ -1,14 +1,14 @@
-#### Raspberry Pi com Freematics OBD-II Emulator MK2
+## Raspberry Pi com Freematics OBD-II Emulator MK2
 
-#### Propósito do Projeto    
+## Propósito do Projeto    
 <!-- Realizar a leitura da rede CAN do emuladador OBD2 MK2 utilizando o Raspberry pi -->
 O projeto tem por objtivo a leitura da rede <a href="https://en.wikipedia.org/wiki/CAN_bus">CANbus</a> do emulador MK2(<a href="https://freematics.com/pages/products/freematics-obd-emulator-mk2/">Freematics OBD-II Emulator MK2</a>) utilizando o <a href="">Raspberry Pi</a>.
 
-#### Como Funciona?
+## Como Funciona?
 ---
-O Raspberry Pi realiza a leitura da rede CANbus através do módulo PiCAN2, reponsável por realizar a comunicação com o emulador MK2, ele torna possível o envio e o recebimento de informações na rede. A comunição é relizada com o envio de uma mensagem em hex(<a href="https://pt.wikipedia.org/wiki/Sistema_de_numera%C3%A7%C3%A3o_hexadecimal">hexadecimal</a>), contendo um ID de identificação da rede CAN(CAN ID), o tamnho da mensagem, o <a href="https://en.wikipedia.org/wiki/OBD-II_PIDs#Services_/_Modes">serviço/modo</a> e o pid requisitado pertencente a esse mesmo serviço/modo. O emulador MK2 retorna uma resposta contendo o valor atual do pid requisitado.
+O Raspberry Pi realiza a leitura da rede CANbus através do módulo PiCAN2, reponsável por realizar a comunicação com o emulador MK2, ele torna possível o envio e o recebimento de informações na rede. A comunição é relizada com o envio de uma mensagem em (<a href="https://pt.wikipedia.org/wiki/Sistema_de_numera%C3%A7%C3%A3o_hexadecimal">hexadecimal</a>), contendo um ID de identificação da rede CAN(CAN ID), o tamnho da mensagem, o <a href="https://en.wikipedia.org/wiki/OBD-II_PIDs#Services_/_Modes">serviço/modo</a> e o pid requisitado pertencente a esse mesmo serviço/modo. O emulador MK2 retorna uma resposta contendo o valor atual do pid requisitado.
 
-#### Configuração da rede CANbus no Raspberry Pi
+## Configuração da rede CANbus no Raspberry Pi
 ---
 ```sh
 #Requisitos para o sistema operacional
@@ -49,9 +49,10 @@ URL_SERVER ="https://mobilidade.inmetro.gov.br"
 TOKEN_DEVICE="token" # O token deve ser obtido pela plataforma
 ```
 
-#### Detalhes da comunicação
---------
-> ISO 15765-4 CAN (11 bit ID,500 Kbaud)
+## Detalhes da comunicação
+---
+
+### ISO 15765-4 CAN (11 bit ID,500 Kbaud)
 
 Formato da mensagem da CAN OBDII, segundo a ISO 15765-4 com a configuração de velocidade 500 Kbaud e tamhano da mensagem de 11 bit ID.
 
@@ -59,17 +60,21 @@ Formato da mensagem da CAN OBDII, segundo a ISO 15765-4 com a configuração de 
 
 ***Exemplo:***
 
-Envio de uma requisição para RPM(0x0C):
-> cansend 7DF#02.01.0C.00.00.00.00.00
-
-Abra um segundo terminal e execute:
+Abra um terminal e execute:
+Esse comando permite ver as respostas da rede CAN mesmo que utilize o código python ou digite os comandos diretemente pelo terminal.
 ```sh
 candump can0
 ```
-Esse comando permite ver as respostas da rede CAN mesmo que utilize o código python ou digite os comandos diretemente pelo terminal.
+
+Abra um segundo terminal e envie uma requisição para RPM(0x0C):
+```sh
+cansend 7DF#02.01.0C.00.00.00.00.00
+```
 
 Resposta do emulador MK2:
-> 7E8# 04 41 0C 07 D0 00 00 00
+```sh
+7E8# 04 41 0C 07 D0 00 00 00
+```
 
 O valor do pid solicitado se encontra após hex 0x0C, no caso o valor de RPM. Sendo esse valor "07 D0 00 00 00". Converta a respota de hexadecimal para decimal e depois aplique os valores à <a href="https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_01_-_Show_current_data">fómula de RPM</a>:
     
