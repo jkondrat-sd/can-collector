@@ -8,21 +8,15 @@ from tb_device_http import TBHTTPDevice
 from dotenv import load_dotenv
 
 # importing functions and dictionaries for web CAN
-from can_translator import *
-from dictionary_pids import *
-
-print("="*32)
-print("||READ CAN OBD IN RASPBERRY PI||")
-print("="*32)
-
+import can_translator as ct
 
 def main():
 
     try:
         bus = can.interface.Bus(
-            channel=INTERFACE,
+            channel=ct.INTERFACE,
             bustype='socketcan',
-            bitrade=BITRADE
+            bitrade=ct.BITRADE
         )
     except Exception as e:
         print(f"Error opening the interface CAN: {e}")
@@ -41,15 +35,15 @@ def main():
         print("Link server and token not thickened!")
     try:
         while True:
-            for mode, mode_data in PIDS_.items():
+            for mode, mode_data in ct.PIDS_.items():
                 for description, pid_values in mode_data.items():
                     pid01, pid02 = pid_values
-                    send_obd_request(bus, mode, pid01, pid02)
+                    ct.send_obd_request(bus, mode, pid01, pid02)
                     start_time = time.time()
                     while time.time() - start_time < 0.2:
                         msg = bus.recv(timeout=0.05)
                         if msg and msg.arbitration_id in (0x7E8, 0x7E9, 0x7EA, 0x7EB):
-                            value = decode_obd_response(mode,msg, pid01, pid02)
+                            value = ct.decode_obd_response(mode,msg, pid01, pid02)
                             if value:
                                 if pid02 == 0x00:
                                     print(f"MODE: {mode} | PID: 0x{pid01:02X} | Description: {description} | Value: {value}")
