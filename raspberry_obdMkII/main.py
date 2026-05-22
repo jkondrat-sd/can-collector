@@ -59,7 +59,7 @@ def main():
                 time.sleep(0.05)
             time.sleep(0.8)
             print("\n")
-    except KeyboardInterrupt:
+    except KeyboardInterrupt: # case user interrupt the software
         print(f"ending...")
     except Exception as e:
         print(f"Erro: {e}")
